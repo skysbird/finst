@@ -3,12 +3,11 @@ finst
 This is an OPS tool for Linux (CentOS first)
 
 TODO:
-
-
-1 add,modify,delete user account into fcenter.
-  a.
-  finst install -u skysbird -c
-  means add an account:
+====
+#. add,modify,delete user account into fcenter.
+  
+   -``finst install -u skysbird -c``
+   means add an account:
 	username = skysbird
 	passwd = [random]
 
@@ -21,7 +20,7 @@ TODO:
   means change account passwd in fcenter
 	
 
-2 add,modify,delete user account from fcener to local or special node.
+#. add,modify,delete user account from fcener to local or special node.
 
   a.
   finst install -u skysbird 
@@ -33,6 +32,16 @@ TODO:
   means add an account to a0.xinwaihui.com,a1.xinwaihui.com,.....a9.xinwaihui.com.
 
   
+  finst install -u skysbird -G admin,engineer -g users
+
+  finst install -u skysbird -S 1
+
+  b.
+
+  finst remove -u skysbird
+
+  c.
+  finst change -u skysbird -G admin -S 0 
 
 
 
