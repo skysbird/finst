@@ -40,21 +40,21 @@ TODO:
 
   - add an account to local, and the account info from fcenter
 
-          ``finst install -u skysbird ``
+          finst install -u skysbird 
 
   - add an account to a0.xinwaihui.com,a1.xinwaihui.com,.....a9.xinwaihui.com.
 
-          ``finst install -u skysbird -h a[0-9].xinwaihui.com``
+          finst install -u skysbird -h a[0-9].xinwaihui.com
 
   - some other usage
  
-             ``finst install -u skysbird -G admin,engineer -g users``
+          finst install -u skysbird -G admin,engineer -g users
 
-             ``finst install -u skysbird ``
+          finst install -u skysbird 
 
-             ``finst remove -u skysbird``
+          finst remove -u skysbird
 
-             ``finst change -u skysbird -G admin ``
+          finst change -u skysbird -G admin 
 
 ###. sudo users
 
@@ -67,7 +67,7 @@ TODO:
          finst remove -sudo -g admin
 
 
-
+    
 
 
 
