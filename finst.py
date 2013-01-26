@@ -67,9 +67,20 @@ def main(argv):
             if cmd_dict.has_key('g') and not cmd_dict.has_key('u'):
                 print "remove group"
         
+        sys.exit(0)
 
     else:
         print "local action"
+        if cmd == "install":
+            if cmd_dict.has_key('u'):
+                print "add user"
+        if cmd == "modify":
+            if cmd_dict.has_key('u'):
+                print "modify user"
+        if cmd == "remove":
+            if cmd_dict.has_key('u'):
+                print "remove user"
+
         if cmd == "install":
             if cmd_dict.has_key('g') and not cmd_dict.has_key('u'):
                 print "add group"
@@ -80,6 +91,7 @@ def main(argv):
             if cmd_dict.has_key('g') and not cmd_dict.has_key('u'):
                 print "remove group"
 
+        sys.exit(0)
         
              
     print opts
