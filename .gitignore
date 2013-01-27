@@ -1,4 +1,7 @@
 .py[cod]
+*.beam
+*.~
+*.dump
 # C extensions
 *.so
 
