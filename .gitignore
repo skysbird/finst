@@ -6,7 +6,7 @@
 *.so
 *.sw[nop]
 ebin
-filo/rel/ss_server
+filo/ss_server/rel/ss_server
 
 # Packages
 *.egg
