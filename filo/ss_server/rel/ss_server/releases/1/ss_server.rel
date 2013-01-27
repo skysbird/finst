@@ -1,0 +1,18 @@
+%% rel generated at {2013,1,27} {15,33,24}
+{release,{"ss_server","1"},
+         {erts,"5.9.2"},
+         [{kernel,"2.15.2"},
+          {stdlib,"1.18.2"},
+          {sasl,"2.2.1"},
+          {crypto,"2.2"},
+          {public_key,"0.16"},
+          {ssl,"5.1"},
+          {log4erl,"0.9.0"},
+          {ss_server,"1.0"},
+          {asn1,"1.8",load},
+          {compiler,"4.8.2",load},
+          {hipe,"3.9.2",load},
+          {inets,"5.9.1",load},
+          {runtime_tools,"1.8.9",load},
+          {tools,"2.6.8",load}]}.
+

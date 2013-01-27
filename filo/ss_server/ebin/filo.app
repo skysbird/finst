@@ -1,0 +1,11 @@
+{application,filo,
+             [{description,"Initial ss server"},
+              {vsn,"1.0"},
+              {id,"filo"},
+              {modules,[filo_app,ss_client_sv,ss_server_app,ss_server_fsm,
+                        ss_server_ssl,ss_server_ssl_fsm,ss_server_sup,
+                        ss_server_sv,ss_server_tcp,ss_socket_agent]},
+              {registered,[]},
+              {applications,[kernel,stdlib]},
+              {mod,{ss_server_app,[]}},
+              {env,[]}]}.
