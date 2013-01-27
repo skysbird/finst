@@ -4,6 +4,9 @@
 *.dump
 # C extensions
 *.so
+*.sw[nop]
+ebin
+rel/ss_server
 
 # Packages
 *.egg
