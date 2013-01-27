@@ -3,7 +3,10 @@ import sys
 import getopt
 import os
 import subprocess
+import crypt
 FILE_PATH  = os.path.abspath(os.path.join(os.getcwd(), __file__))
+FILO_SERVER = "localhost"
+FILO_PORT = 2222
 
 def usage():
     print "usage:"
@@ -23,7 +26,23 @@ def dist(host):
         print "Failed to distrubte finst to %s"%host
 
 def add_user(user):
-    print "add user"
+    username = user['u']
+    user_str = center_get_user(username)
+    if user_str=="no data":
+        print "user does not exsist in filo, please add user in filo first"
+        sys.exit(2)
+    user_dict = json.loads(user_str)
+    passwd = user_dict['passwd']
+    return not subprocess.Popen(["adduser", "-m",username,"-p",passwd]).wait()
+
+def modify_user(user):
+    username = user['u']
+    passwd = crypt.crypt('1234')
+    return not subprocess.Popen(["adduser", "-m",username,"-p",passwd]).wait()
+
+def remove_user(user):
+    username = user['u']
+    return not subprocess.Popen(["userdel", username]).wait()
 
 def remote_add_user(cmd_dict,remote_host):
     cmd = "finst.py install"
@@ -58,13 +77,74 @@ def remote_remove_user(cmd_dict,remote_host):
     rel = subprocess.Popen(["ssh", remote_host, cmd]).wait()
     return not rel
 
+import json
+import socket,ssl,pprint
+import string
+import random
+
+def makepassword(rang = "23456789qwertyupasdfghjkzxcvbnm", size = 8):
+    return string.join(random.sample(rang, size)).replace(" ","")
+
+def send_cmd(cmd):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM )
+   # require a certificate from the server
+    ssl_sock = ssl.wrap_socket(s)
+    ssl_sock.connect((FILO_SERVER, FILO_PORT))
+    ssl_sock.write(cmd)
+    data = ssl_sock.read()
+    data += ssl_sock.read()
+    ssl_sock.close()
+    return data
+
+def center_get_user(username):
+    cmd_dict = {}
+    cmd_dict['cmd'] = 'get_user'
+    cmd_dict['u'] = username
+    cmd_str = json.dumps(cmd_dict)
+    r = send_cmd(cmd_str)
+    return r
+
+def center_add_user(user):
+   if not user.has_key('e'):
+        usage()
+        sys.exit(2)
+
+   user_str = center_get_user(user['u'])
+   if user_str!="no data":
+        print "user already exsist in filo center"
+        sys.exit(2)
+
+   passwd = makepassword()
+   print "passwd is %s"%passwd
+   passwd = crypt.crypt(passwd)
+   cmd_dict = user
+   cmd_dict['cmd'] = "add_user"
+   cmd_dict['p'] = passwd
+   cmd_str = json.dumps(cmd_dict)
+   r = send_cmd(cmd_str)
+   print r
+
+def center_remove_user(user):
+   cmd_dict = user
+   cmd_dict['cmd'] = "remove_user"
+   cmd_str = json.dumps(cmd_dict)
+   r = send_cmd(cmd_str)
+   print r
+
+def center_modify_user(user):
+   cmd_dict = user
+   cmd_dict['cmd'] = "modify_user"
+   cmd_str = json.dumps(cmd_dict)
+   r = send_cmd(cmd_str)
+   print r
+   
 def main(argv):
     try:           
         cmd = sys.argv[1]
         if cmd not in cmd_list:
             usage();
             sys.exit(2)
-        opts, args = getopt.getopt(argv, "g:h:u:cG:", ["sudo"]) 
+        opts, args = getopt.getopt(argv, "g:h:u:cG:e:", ["sudo"]) 
     except getopt.GetoptError:           
         usage()                          
         sys.exit(2)             
@@ -79,6 +159,8 @@ def main(argv):
             cmd_dict['h'] = a
         elif o=='-G':
             cmd_dict['G'] = a
+        elif o=='-e':
+            cmd_dict['e'] = a
         elif o=='-c':
             cmd_dict['c'] = 1
 
@@ -94,13 +176,13 @@ def main(argv):
         print "center action" 
         if cmd == "install":
             if cmd_dict.has_key('u'):
-                print "center add user"
+                center_add_user(cmd_dict)
         elif cmd == "modify":
             if cmd_dict.has_key('u'):
-                print "center modify user"
+                center_modify_user(cmd_dict)
         elif cmd == "remove":
             if cmd_dict.has_key('u'):
-                print "center remove user"
+                center_remove_user(cmd_dict)
 
         sys.exit(0)
         
@@ -145,13 +227,26 @@ def main(argv):
         print "local action"
         if cmd == "install":
             if cmd_dict.has_key('u'):
-                add_user({})
+                if add_user(cmd_dict):
+                    print "Success to add user"
+                else:
+                    print "Failed to add user"
+                    sys.exit(2)
+
         if cmd == "modify":
             if cmd_dict.has_key('u'):
-                print "modify user"
+                if modify_user(cmd_dict):
+                    print "Success to modify user"
+                else:
+                    print "Failed to modify user"
+                    sys.exit(2)
         if cmd == "remove":
             if cmd_dict.has_key('u'):
-                print "remove user"
+                if remove_user(cmd_dict):
+                    print "Success to remove user"
+                else:
+                    print "Failed to remove user"
+                    sys.exit(2)
 
         if cmd == "install":
             if cmd_dict.has_key('g') and not cmd_dict.has_key('u'):

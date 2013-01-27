@@ -1,4 +1,4 @@
-%% rel generated at {2013,1,27} {15,33,24}
+%% rel generated at {2013,1,27} {21,13,46}
 {release,{"ss_server","1"},
          {erts,"5.9.2"},
          [{kernel,"2.15.2"},
@@ -8,11 +8,17 @@
           {public_key,"0.16"},
           {ssl,"5.1"},
           {log4erl,"0.9.0"},
+          {gs,"1.5.15.1"},
+          {tv,"2.1.4.9"},
+          {mnesia,"4.7.1"},
           {ss_server,"1.0"},
           {asn1,"1.8",load},
           {compiler,"4.8.2",load},
+          {eunit,"2.2.3",load},
           {hipe,"3.9.2",load},
           {inets,"5.9.1",load},
+          {pman,"2.7.1.2",load},
           {runtime_tools,"1.8.9",load},
-          {tools,"2.6.8",load}]}.
+          {tools,"2.6.8",load},
+          {xmerl,"1.3.2",load}]}.
 

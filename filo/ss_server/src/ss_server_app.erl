@@ -12,6 +12,7 @@
 
 %% Application callbacks
 -export([start/2, stop/1]).
+-include("account.hrl").
 
 -define(DEF_PORT,    2222).
 %%parameters process function
@@ -52,6 +53,13 @@ get_app_env(Opt,Default)->
 %% @end
 %%--------------------------------------------------------------------
 start(_StartType, _StartArgs) ->
+    application:stop(mnesia),
+    mnesia:create_schema([node()]),
+    application:start(mnesia),    
+    mnesia:create_table(account,[{disc_copies,[node()]},
+                                 {attributes,
+                                        record_info(fields,account)}]),
+
     error_logger:add_report_handler(error_logger_log4erl_h),
     LogSize = 1000000,
     LogFileCount = 10,

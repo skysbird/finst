@@ -28,6 +28,7 @@
                 socket,    % client socket
                 addr       % client address
                }).
+-include("account.hrl").
 
 -define(TIMEOUT, 120000).
 
@@ -80,21 +81,11 @@ init([]) ->
     %% inet:setopts(Socket, [{active, once}, {packet, 2}, binary]),
     %% for test
     ssl:setopts(Socket, [{active, once}]),
-    %{sslsocket,new_ssl,<0.63.0>}
-    SocketPid = case Socket of
-        {sslsocket,new_ssl,Pid} -> io:format("socket pid is ~p\n",[Pid]),
-        pid_to_list(Pid)
-    end,
-    ets:insert(socket_list,{SocketPid,Socket}),
     case  ssl:peername(Socket) of
         {ok, {IP, _Port}} -> io:format("~p,~p,socket in\n",[IP,_Port]),
             {next_state, 'WAIT_FOR_DATA', State#state{socket=Socket, addr=IP}, ?TIMEOUT};
         {error,closed} -> 
             %tell process node disconnect 
-            Data = <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?><package uid=\"\"><request type=\"logout\" id=\"\" ></request></package>">>,
-            Term = {Data,node(),list_to_binary(SocketPid)},
-            {p, 'ss1@192.168.0.117'} ! Term,
-            ets:delete(socket_list,SocketPid),
             log4erl:log(info,"connection closed"),
             {stop, normal, State}
     end;
@@ -108,19 +99,52 @@ init([]) ->
 'WAIT_FOR_DATA'({data, Data}, #state{socket=S} = State) ->
     io:format("data came\n"),
     io:format("route request to process module\n"),
-    Term = {Data,node(),list_to_binary(get_socket_pid(S))},
-    {p, 'ss1@192.168.0.117'} ! Term,
+    Cmd = json2:decode(Data),
+    case Cmd of 
+       {struct,JsonData}->
+            Op = proplists:get_value(<<"cmd">>,JsonData),
+            Result = case Op of
+                    <<"add_user">>->
+                        Username = proplists:get_value(<<"u">>,JsonData),
+                        Email = proplists:get_value(<<"e">>,JsonData),
+                        Pass = proplists:get_value(<<"p">>,JsonData),
+                        User = #account{username=Username,email=Email,passwd=Pass},
+                        user_func:add_user(User);
+                    <<"remove_user">>->
+                        user_func:remove_user("");
+                    <<"modify_user">>->
+                        user_func:modify_user("");
+                    <<"get_user">>->
+                        Username = proplists:get_value(<<"u">>,JsonData),
+                        User = user_func:get_user(Username),
+                        case User of
+                            {error,Data1}->
+                                {err,Data1};
+                            _->
+                                UserStr = json2:encode(User),
+                                {info ,UserStr}
+                        end;
+                    _->
+                        log4erl:log(info,"no specified command found"),
+                        {error,"no specified command found"}
+                end,
+
+            case Result of
+                ok->
+                   ssl:send(S,"ok");
+                {info,Message}->
+                    ssl:send(S,Message);
+                {err,Err}->
+                   ssl:send(S,Err)
+            end 
+    end,
+
     {next_state, 'WAIT_FOR_DATA', State, ?TIMEOUT};
 
 'WAIT_FOR_DATA'(timeout, #state{socket=S} = State) ->
     io:format("data timeout\n"),
     error_logger:error_msg("~p Client connection timeout - closing.\n", [self()]),
-    SocketPid = get_socket_pid(S),
     %tell process node disconnect 
-    Data = <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?><package uid=\"\"><request type=\"logout\" id=\"\" ></request></package>">>,
-    Term = {Data,node(),list_to_binary(SocketPid)},
-    {p, 'ss1@192.168.0.117'} ! Term,
-    ets:delete(socket_list,SocketPid),
     {stop, normal, State};
 
 'WAIT_FOR_DATA'(Data, State) ->
@@ -173,12 +197,6 @@ handle_info({ssl_closed, Socket}, _StateName,
             #state{socket=Socket, addr=Addr} = StateData) ->
     log4erl:log(info,"~p Client ~p disconnected.\n", [self(), Addr]),
 
-    SocketPid = get_socket_pid(Socket), 
-    %tell process node disconnect 
-    Data = <<"<?xml version=\"1.0\" encoding=\"UTF-8\"?><package uid=\"\"><request type=\"logout\" id=\"\" ></request></package>">>,
-    Term = {Data,node(),list_to_binary(SocketPid)},
-    {p, 'ss1@192.168.0.117'} ! Term,
-    ets:delete(socket_list,SocketPid),
     {stop, normal, StateData};
 %%--------------------------------------------------------------------
 %% @private
