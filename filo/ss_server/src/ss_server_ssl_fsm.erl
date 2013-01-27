@@ -111,9 +111,14 @@ init([]) ->
                         User = #account{username=Username,email=Email,passwd=Pass},
                         user_func:add_user(User);
                     <<"remove_user">>->
-                        user_func:remove_user("");
+                        Username = proplists:get_value(<<"u">>,JsonData),
+                        User = #account{username=Username},
+                        user_func:remove_user(User);
                     <<"modify_user">>->
-                        user_func:modify_user("");
+                        Username = proplists:get_value(<<"u">>,JsonData),
+                        Email = proplists:get_value(<<"e">>,JsonData),
+                        User = #account{username=Username,email=Email},
+                        user_func:modify_user(User);
                     <<"get_user">>->
                         Username = proplists:get_value(<<"u">>,JsonData),
                         User = user_func:get_user(Username),

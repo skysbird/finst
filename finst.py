@@ -122,21 +122,29 @@ def center_add_user(user):
    cmd_dict['p'] = passwd
    cmd_str = json.dumps(cmd_dict)
    r = send_cmd(cmd_str)
-   print r
+   return r=="ok"
 
 def center_remove_user(user):
+   user_str = center_get_user(user['u'])
+   if user_str=="no data":
+        print "user has not in filo yet"
+        sys.exit(2)
    cmd_dict = user
    cmd_dict['cmd'] = "remove_user"
    cmd_str = json.dumps(cmd_dict)
    r = send_cmd(cmd_str)
-   print r
+   return r=="ok"
 
 def center_modify_user(user):
+   user_str = center_get_user(user['u'])
+   if user_str=="no data":
+        print "user has not in filo yet"
+        sys.exit(2)
    cmd_dict = user
    cmd_dict['cmd'] = "modify_user"
    cmd_str = json.dumps(cmd_dict)
    r = send_cmd(cmd_str)
-   print r
+   return r=="ok"
    
 def main(argv):
     try:           
@@ -176,13 +184,16 @@ def main(argv):
         print "center action" 
         if cmd == "install":
             if cmd_dict.has_key('u'):
-                center_add_user(cmd_dict)
+                if center_add_user(cmd_dict):
+                    print "Success to add user to filo center"
         elif cmd == "modify":
             if cmd_dict.has_key('u'):
-                center_modify_user(cmd_dict)
+                if center_modify_user(cmd_dict):
+                    print "Success to add user to filo center"
         elif cmd == "remove":
             if cmd_dict.has_key('u'):
-                center_remove_user(cmd_dict)
+                if center_remove_user(cmd_dict):
+                    print "Success to add user to filo center"
 
         sys.exit(0)
         

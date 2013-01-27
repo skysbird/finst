@@ -19,11 +19,27 @@ add_user(User)->
     ok.
 
 remove_user(User)->
-    io:format("remove_user"),
+    Save = fun()->
+            mnesia:delete({account,User#account.username})
+     end,
+    mnesia:transaction(Save),
     ok.
 
-modify_user(User)->
-    io:format("modify_user"),
+modify_user(User1)->
+    F = fun() ->  
+        User = #account{username = User1#account.username, email='_',passwd='_'},  
+        io:format("to search ~p",[User]),
+        case mnesia:select(account, [{User, [], ['$_']}]) of
+            [Result]->
+                Result2 = Result#account{email= User1#account.email},
+                io:format("~p",[Result2]),
+                mnesia:write(Result2);
+            _->
+                io:format("not found"),
+                ok
+        end
+      end,  
+    {atomic,_Result1} = mnesia:transaction(F),
     ok.
 
 get_user(Username)->
