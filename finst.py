@@ -5,7 +5,7 @@ import getopt
 def usage():
     print "usage:"
 
-cmd_list = ['install','remove','modify']
+cmd_list = ['install','remove','modify','dist']
 def main(argv):
     try:           
         cmd = sys.argv[1]
@@ -27,6 +27,13 @@ def main(argv):
             cmd_dict['h'] = a
         elif o=='-c':
             cmd_dict['c'] = 1
+
+    if cmd == "dist":
+        if cmd_dict.has_key('h'):
+            print "dist"
+        else:
+            usage()
+        sys.exit(0)
     
     if cmd_dict.has_key('c'):
         print "center action" 

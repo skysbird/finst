@@ -4,6 +4,12 @@ This is an OPS tool for Linux (CentOS first)
 
 TODO:
 ====
+###. distribute finst self
+
+   - distribute finst to remote host
+
+        finst dist  -h a[0-9].xinwaihui.com
+
 ###. add,  remove a group.
 
    - add group with name=eng
