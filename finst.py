@@ -33,7 +33,20 @@ def add_user(user):
         sys.exit(2)
     user_dict = json.loads(user_str)
     passwd = user_dict['passwd']
-    return not subprocess.Popen(["adduser", "-m",username,"-p",passwd]).wait()
+    G = None
+    g = None
+    if user_dict.has_key("G"):
+        G = user_dict["G"]
+
+    if user_dict.has_key("g"):
+        g = user_dict["g"]
+
+    if not g and not G:
+        return not subprocess.Popen(["useradd", "-m",username,"-p",passwd]).wait()
+    elif g:
+        return not subprocess.Popen(["useradd", "-m",username,"-p",passwd,"-g",g]).wait()
+    elif G:
+        return not subprocess.Popen(["useradd", "-m",username,"-p",passwd,"-G",G]).wait()
 
 def modify_user(user):
     username = user['u']
@@ -116,7 +129,7 @@ def center_add_user(user):
 
    passwd = makepassword()
    print "passwd is %s"%passwd
-   passwd = crypt.crypt(passwd)
+   passwd = crypt.crypt(passwd,makepassword(size=2))
    cmd_dict = user
    cmd_dict['cmd'] = "add_user"
    cmd_dict['p'] = passwd

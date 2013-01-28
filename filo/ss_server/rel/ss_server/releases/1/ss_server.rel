@@ -1,4 +1,4 @@
-%% rel generated at {2013,1,27} {22,41,57}
+%% rel generated at {2013,1,28} {16,15,1}
 {release,{"ss_server","1"},
          {erts,"5.9.2"},
          [{kernel,"2.15.2"},
