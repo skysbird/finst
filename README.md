@@ -2,6 +2,10 @@ finst
 =====
 This is an OPS tool for Linux (CentOS first)
 
+Deployment
+=====
+![Alt text](https://raw.github.com/skysbird/finst/master/finst.png)
+
 TODO:
 ====
 ###. distribute finst self
