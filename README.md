@@ -53,7 +53,7 @@ Feature:
   
          finst remove -g eng
 
-         finst remove -g eng -h a[0-9].xinwaihui.com
+         finst remove -g eng -h 'a[0-9].xinwaihui.com'
 
 ###. add,modify,remove user account into fcenter.
 
