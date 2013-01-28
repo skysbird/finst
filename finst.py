@@ -20,12 +20,87 @@ def scp(source, server, path = ""):
 
 def dist(host):
     remote_host_list = split_host(host)
-    print remote_host_list
     for host in remote_host_list:
         if scp(FILE_PATH,host,"/usr/sbin"):
             print "Success to distribute finst to %s"%host
         else:
             print "Failed to distrubte finst to %s"%host
+
+def test_already_has_key(host):
+    import pexpect
+    cmd = "ssh %s echo 'hi'"%host
+    ssh = pexpect.spawn(cmd)
+    try:
+        i = ssh.expect(['password:','continue connecting','hi'],timeout=5)
+        if i == 0 or i==1:
+            ssh.close()
+            return 0
+        if i == 2:
+            ssh.close()
+            print "Key already added to Host %s"%host
+            return 1
+    except:
+        import traceback
+        traceback.print_exc()
+        return 0
+        
+    
+def do_answer(host,passwd):
+    import pexpect
+    cmd = "ssh-copy-id %s"%host
+    ssh = pexpect.spawn(cmd)
+    try:
+        i = ssh.expect(['password:','continue connecting','make sure'],timeout=5)
+        if i == 0:
+            ssh.sendline(passwd)
+            j = ssh.expect(['password:','make sure'],timeout=5)            
+            if j==0:
+                print "password wrong for %s"%host
+                ssh.close()
+                return 0
+            if j==1:
+                ssh.close()
+                return 1
+
+        elif i==1:
+            ssh.sendline('yes\n')
+            ssh.expect('password: ')
+            ssh.sendline(passwd)
+            j = ssh.expect(['password:','make sure'],timeout=5)            
+            if j==0:
+                print "password wrong for %s"%host
+                ssh.close()
+                return 0
+            if j==1:
+                ssh.close()
+                return 1
+        elif i==2:
+            print "Key already added to %s"%host
+            ssh.close()
+            return 0
+        ret = ssh.read()
+    except:
+        import traceback
+        traceback.print_exc()
+        pass
+        ssh.close()
+        return 0
+    ssh.close()
+    return 1
+
+    
+import getpass
+def dist_ssh_key(host_str):
+    info = "Please Input Password of %s: "%host_str
+    passwd = getpass.getpass(info)
+    remote_host_list = split_host(host_str)
+    for host in remote_host_list:
+        print "Adding key to host %s"%host
+        if not test_already_has_key(host):
+            if do_answer(host,passwd):
+                print "Key added to Host %s"%host
+
+        
 
 def add_user(user):
     username = user['u']
@@ -167,7 +242,7 @@ def main(argv):
         if cmd not in cmd_list:
             usage();
             sys.exit(2)
-        opts, args = getopt.getopt(argv, "g:h:u:cG:e:", ["sudo"]) 
+        opts, args = getopt.getopt(argv, "g:h:u:cG:e:", ["sudo","ssh-key"]) 
     except getopt.GetoptError:           
         usage()                          
         sys.exit(2)             
@@ -186,11 +261,21 @@ def main(argv):
             cmd_dict['e'] = a
         elif o=='-c':
             cmd_dict['c'] = 1
+        elif o=='--ssh-key':
+            cmd_dict['ssh-key'] = 1
+        elif o=='--sudo':
+            cmd_dict['sudo'] = 1
+
 
     if cmd == "dist":
         if cmd_dict.has_key('h'):
-            host_list = cmd_dict['h']
-            dist(host_list)
+            if not cmd_dict.has_key("ssh-key"):
+                host_list = cmd_dict['h']
+                dist(host_list)
+            else:
+                host_list = cmd_dict['h']
+                dist_ssh_key(host_list)
+                
         else:
             usage()
         sys.exit(0)
