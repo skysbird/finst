@@ -35,6 +35,11 @@ INSTALL
     
 Feature:
 ====
+###. distribute the ssh-key
+	
+    finst dist --ssh-key -h 'a[0-9].xinwaihui.com'
+
+
 ###. distribute finst self
 
    - distribute finst to remote host
@@ -85,11 +90,6 @@ Feature:
 
 TODO
 =======
-
-###. distribute the ssh-key
-	
-    finst dist --ssh-key -h 'a[0-9].xinwaihui.com'
-
 
 ###. add,  remove a group.
 
