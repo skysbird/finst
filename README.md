@@ -41,19 +41,6 @@ Feature:
 
         finst dist  -h 'a[0-9].xinwaihui.com b[0-9].xinwaihui.com'
 
-###. add,  remove a group.
-
-   - add group with name=eng
-
-         finst install -g eng 
-  
-         finst install -g eng -h 'a[0-9].xinwaihui.com b[0-9].xinwaihui.com'
-
-   - remove group
-  
-         finst remove -g eng
-
-         finst remove -g eng -h 'a[0-9].xinwaihui.com'
 
 ###. add,modify,remove user account into fcenter.
 
@@ -93,6 +80,32 @@ Feature:
 
           finst modify -u skysbird -G admin 
 
+
+
+
+TODO
+=======
+
+###. distribute the ssh-key
+	
+    finst dist --ssh-key -h 'a[0-9].xinwaihui.com'
+
+
+###. add,  remove a group.
+
+   - add group with name=eng
+
+         finst install -g eng 
+  
+         finst install -g eng -h 'a[0-9].xinwaihui.com b[0-9].xinwaihui.com'
+
+   - remove group
+  
+         finst remove -g eng
+
+         finst remove -g eng -h 'a[0-9].xinwaihui.com'
+
+
 ###. sudo users
 
    - add group to sudoers
@@ -102,9 +115,6 @@ Feature:
    - remove group from sudoers
 
          finst remove --sudo -g admin
-
-
-    
 
 
 
