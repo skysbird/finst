@@ -19,11 +19,13 @@ def scp(source, server, path = ""):
         #return not os.popen(cmd).wait()
 
 def dist(host):
-    print FILE_PATH
-    if scp(FILE_PATH,host,"/usr/sbin"):
-        print "Success to distribute finst to %s"%host
-    else:
-        print "Failed to distrubte finst to %s"%host
+    remote_host_list = split_host(host)
+    print remote_host_list
+    for host in remote_host_list:
+        if scp(FILE_PATH,host,"/usr/sbin"):
+            print "Success to distribute finst to %s"%host
+        else:
+            print "Failed to distrubte finst to %s"%host
 
 def add_user(user):
     username = user['u']
@@ -309,7 +311,10 @@ def merge(a,b):
         ra = reobj.sub("[]",a)
         number_list = number_str.split('-')
         for n in range(int(number_list[0]),int(number_list[1])+1):
-            rel.append("%s.%s"%(reobj.sub(str(n),ra),b))
+            if b:
+                rel.append("%s.%s"%(reobj.sub(str(n),ra),b))
+            else:
+                rel.append("%s"%(reobj.sub(str(n),ra)))
         return rel
             
         
@@ -321,9 +326,9 @@ def parse(host):
     for part in reversed(part_list):
         result1 = []
         for r in result:
-            result1 = merge(part,r)
-        result = result + result1
-   
+            result1 = result1+ merge(part,r)
+            
+        result = result1
     return result1
 
     
