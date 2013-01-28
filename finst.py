@@ -213,25 +213,27 @@ def main(argv):
     if cmd_dict.has_key('h'):
         print "remote action"
         remote_host = cmd_dict['h']
-        if cmd == "install":
-            if cmd_dict.has_key('u'):
-               if remote_add_user(cmd_dict,remote_host):
-                    print "Success to add user to remote host %s"%remote_host
-               else:
-                    print "Failed to add user to remote host %s"%remote_host
+        remote_host_list = split_host(remote_host)
+        for remote_host in remote_host_list:
+            if cmd == "install":
+                if cmd_dict.has_key('u'):
+                   if remote_add_user(cmd_dict,remote_host):
+                        print "Success to add user to remote host %s"%remote_host
+                   else:
+                        print "Failed to add user to remote host %s"%remote_host
 
-        if cmd == "modify":
-            if cmd_dict.has_key('u'):
-               if remote_modify_user(cmd_dict,remote_host):
-                    print "Success to modify user to remote host %s"%remote_host
-               else:
-                    print "Failed to modify user to remote host %s"%remote_host
-        if cmd == "remove":
-            if cmd_dict.has_key('u'):
-               if remote_remove_user(cmd_dict,remote_host):
-                    print "Success to remove user to remote host %s"%remote_host
-               else:
-                    print "Failed to remove user to remote host %s"%remote_host
+            if cmd == "modify":
+                if cmd_dict.has_key('u'):
+                   if remote_modify_user(cmd_dict,remote_host):
+                        print "Success to modify user to remote host %s"%remote_host
+                   else:
+                        print "Failed to modify user to remote host %s"%remote_host
+            if cmd == "remove":
+                if cmd_dict.has_key('u'):
+                   if remote_remove_user(cmd_dict,remote_host):
+                        print "Success to remove user to remote host %s"%remote_host
+                   else:
+                        print "Failed to remove user to remote host %s"%remote_host
 
         sys.exit(0)
 
@@ -286,6 +288,58 @@ def main(argv):
         
              
     print opts
+
+import re
+
+reobj = re.compile("\[.*\]")
+
+
+def merge(a,b):
+    #merge a[0-9] like to b, b must not have []
+    rel = []
+    if '[' not in a and ']' not in a:
+        if b:
+            return ["%s.%s"%(a,b)]
+        else:
+            return [a]
+    else:
+        #parse [] in a
+        number_str = reobj.findall(a)[0][1:-1]
+        
+        ra = reobj.sub("[]",a)
+        number_list = number_str.split('-')
+        for n in range(int(number_list[0]),int(number_list[1])+1):
+            rel.append("%s.%s"%(reobj.sub(str(n),ra),b))
+        return rel
+            
+        
+          
+def parse(host):
+    part_list = host.split(".")
+    result = [""]
+
+    for part in reversed(part_list):
+        result1 = []
+        for r in result:
+            result1 = merge(part,r)
+        result = result + result1
+   
+    return result1
+
+    
+
+def split_host(host):
+    rel = []
+    host = host.strip()
+    reobj = re.compile("\s+")
+    host = reobj.sub(' ',host)
+    host_list = host.split(' ')
+
+    for h in host_list:
+        rel = rel + parse(h)
+    return rel 
+    
+
 
 if __name__ == "__main__":
     if len(sys.argv)<2:

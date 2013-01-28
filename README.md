@@ -39,7 +39,7 @@ Feature:
 
    - distribute finst to remote host
 
-        finst dist  -h a[0-9].xinwaihui.com
+        finst dist  -h 'a[0-9].xinwaihui.com b[0-9].xinwaihui.com'
 
 ###. add,  remove a group.
 
@@ -47,7 +47,7 @@ Feature:
 
          finst install -g eng 
   
-         finst install -g eng -h a[0-9].xinwaihui.com
+         finst install -g eng -h 'a[0-9].xinwaihui.com b[0-9].xinwaihui.com'
 
    - remove group
   
@@ -81,7 +81,7 @@ Feature:
 
   - add an account to a0.xinwaihui.com,a1.xinwaihui.com,.....a9.xinwaihui.com.
 
-          finst install -u skysbird -h a[0-9].xinwaihui.com
+          finst install -u skysbird -h 'a[0-9].xinwaihui.com'
 
   - some other usage
  
