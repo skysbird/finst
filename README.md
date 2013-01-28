@@ -6,7 +6,34 @@ Deployment
 =====
 ![Alt text](https://raw.github.com/skysbird/finst/master/finst.png)
 
-TODO:
+
+INSTALL
+======
+###. Build the Profile Server
+
+    Profile Server is written by Erlang OTP R15B02, and we just test it can be ran on this version of erlang, so please make sure you have installed Erlang OTP R15B02 or higher version on your server.
+
+          cd filo/ss_server
+
+         ./rebar compile
+
+         ./rebar generate
+
+
+
+###. Startup the Profile Server
+
+         ./start_profile_server.sh 
+
+            Profile Server will start up, and will be listen on port 2222 by default, you can change this port value in filo/ss_server/rel/ss_server/releases/1/vm.args. just add the line -listen_port 12345 in the file then restart the profile server.
+
+   
+###. Shutdown the Profile Server
+
+         ./shutdown_profile_server.sh
+
+    
+Feature:
 ====
 ###. distribute finst self
 
