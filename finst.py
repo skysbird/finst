@@ -11,7 +11,19 @@ FILO_SERVER = "localhost"
 FILO_PORT = 2222
 
 def usage():
-    print "usage:"
+    print "\nusage:install|remove|modify|dist [Options]"
+    print """
+Options:
+-h  remote node to run command, support a[0-9,a,b,c].yourserver.com.
+-u  user name
+-g  primary group name
+-G  addtional group
+
+--sudo  add and remove sudo command
+--ssh-key   distribute ssh-key, always use with -h option
+         """
+            
+                
 
 cmd_list = ['install','remove','modify','dist']
 
@@ -649,7 +661,7 @@ def split_host(host):
 if __name__ == "__main__":
     profile_server = os.environ.get('FINST_PROFILE_SERVER')
     if not profile_server:
-        print "Not find FINST_PROFILE_SERVER environment variable, will use the default localhost:2222"
+        print "\nWarning: Not find FINST_PROFILE_SERVER environment variable, will use the default localhost:2222"
     else:
         server_port = profile_server.split(":")
         FILO_SERVER = server_port[0]
