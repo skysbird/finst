@@ -107,12 +107,6 @@ Feature:
          finst remove -g eng -h 'a[0-9].xinwaihui.com'
 
 
-
-TODO
-=======
-
-
-
 ###. sudo users
 
    - add group to sudoers
@@ -122,6 +116,13 @@ TODO
    - remove group from sudoers
 
          finst remove --sudo -g admin
+
+
+TODO
+=======
+
+
+
 
 
 
