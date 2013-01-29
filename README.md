@@ -121,7 +121,11 @@ Feature:
 TODO
 =======
 
+###. Daemon process
 
+   - need daemon process to sync the user password in center to local node
+
+     
 
 
 
