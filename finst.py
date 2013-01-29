@@ -4,6 +4,8 @@ import getopt
 import os
 import subprocess
 import crypt
+
+
 FILE_PATH  = os.path.abspath(os.path.join(os.getcwd(), __file__))
 FILO_SERVER = "localhost"
 FILO_PORT = 2222
@@ -432,6 +434,14 @@ def split_host(host):
 
 
 if __name__ == "__main__":
+    profile_server = os.environ.get('FINST_PROFILE_SERVER')
+    if not profile_server:
+        print "Not find FINST_PROFILE_SERVER environment variable, will use the default localhost:2222"
+    else:
+        server_port = profile_server.split(":")
+        FILO_SERVER = server_port[0]
+        FILO_PORT = server_port[1]
+
     if len(sys.argv)<2:
         usage();
     else:
