@@ -103,6 +103,13 @@ def dist_ssh_key(host_str):
                 print "Key added to Host %s"%host
 
         
+def add_group(group):
+    groupname = group['g']
+    return not subprocess.Popen(["groupadd", groupname]).wait()
+ 
+def remove_group(group):
+    groupname = group['g']
+    return not subprocess.Popen(["groupdel", groupname]).wait()
 
 def add_user(user):
     username = user['u']
@@ -114,14 +121,16 @@ def add_user(user):
     passwd = user_dict['passwd']
     G = None
     g = None
-    if user_dict.has_key("G"):
-        G = user_dict["G"]
+    if user.has_key("G"):
+        G = user["G"]
 
-    if user_dict.has_key("g"):
-        g = user_dict["g"]
+    if user.has_key("g"):
+        g = user["g"]
 
     if not g and not G:
         return not subprocess.Popen(["useradd", "-m",username,"-p",passwd]).wait()
+    elif g and G:
+        return not subprocess.Popen(["useradd", "-m",username,"-p",passwd,"-g",g,"-G",G]).wait()
     elif g:
         return not subprocess.Popen(["useradd", "-m",username,"-p",passwd,"-g",g]).wait()
     elif G:
@@ -129,8 +138,25 @@ def add_user(user):
 
 def modify_user(user):
     username = user['u']
-    passwd = crypt.crypt('1234')
-    return not subprocess.Popen(["adduser", "-m",username,"-p",passwd]).wait()
+    user_str = center_get_user(username)
+    if user_str=="no data":
+        print "user does not exsist in filo, please mod user in filo first"
+        sys.exit(2)
+    user_dict = json.loads(user_str)
+    G = None
+    g = None
+    if user.has_key("G"):
+        G = user["G"]
+
+    if user.has_key("g"):
+        g = user["g"]
+
+    if g and G:
+        return not subprocess.Popen(["usermod", "-g",g,"-G",G,username]).wait()
+    elif g:
+        return not subprocess.Popen(["usermod", "-g",g,username]).wait()
+    elif G:
+        return not subprocess.Popen(["usermod", "-G",G,username]).wait()
 
 def remove_user(user):
     username = user['u']
@@ -159,6 +185,29 @@ def remote_modify_user(cmd_dict,remote_host):
     return not rel
 
 def remote_remove_user(cmd_dict,remote_host):
+    cmd = "finst.py remove"
+    params = ""
+    for c,a in cmd_dict.iteritems():
+        if c=='h':
+            continue
+        params = params + "-%s %s "%(c,a)
+    cmd = "%s %s"%(cmd,params)
+    rel = subprocess.Popen(["ssh", remote_host, cmd]).wait()
+    return not rel
+
+
+def remote_add_group(cmd_dict,remote_host):
+    cmd = "finst.py install"
+    params = ""
+    for c,a in cmd_dict.iteritems():
+        if c=='h':
+            continue
+        params = params + "-%s %s "%(c,a)
+    cmd = "%s %s"%(cmd,params)
+    rel = subprocess.Popen(["ssh", remote_host, cmd]).wait()
+    return not rel
+
+def remote_remove_group(cmd_dict,remote_host):
     cmd = "finst.py remove"
     params = ""
     for c,a in cmd_dict.iteritems():
@@ -324,19 +373,20 @@ def main(argv):
                    else:
                         print "Failed to remove user to remote host %s"%remote_host
 
-        sys.exit(0)
-
-        if cmd == "install":
-            if cmd_dict.has_key('g') and not cmd_dict.has_key('u'):
-                print "add group"
-        if cmd == "modify":
-            if cmd_dict.has_key('g') and not cmd_dict.has_key('u'):
-                print "modify group"
-        if cmd == "remove":
-            if cmd_dict.has_key('g') and not cmd_dict.has_key('u'):
-                print "remove group"
-        
-        sys.exit(0)
+            if cmd == "install":
+                if cmd_dict.has_key('g') and not cmd_dict.has_key('u'):
+                   if remote_add_group(cmd_dict,remote_host):
+                        print "Success to add group to remote host %s"%remote_host
+                   else:
+                        print "Failed to add group to remote host %s"%remote_host
+            if cmd == "remove":
+                if cmd_dict.has_key('g') and not cmd_dict.has_key('u'):
+                   if remote_remove_group(cmd_dict,remote_host):
+                        print "Success to remove group to remote host %s"%remote_host
+                   else:
+                        print "Failed to remove group to remote host %s"%remote_host
+            
+            sys.exit(0)
 
     else:
         print "local action"
@@ -365,13 +415,19 @@ def main(argv):
 
         if cmd == "install":
             if cmd_dict.has_key('g') and not cmd_dict.has_key('u'):
-                print "add group"
-        if cmd == "modify":
-            if cmd_dict.has_key('g') and not cmd_dict.has_key('u'):
-                print "modify group"
+                if add_group(cmd_dict):
+                    print "Success to add group"
+                else:
+                    print "Failed to add group"
+                    sys.exit(2)
+
         if cmd == "remove":
             if cmd_dict.has_key('g') and not cmd_dict.has_key('u'):
-                print "remove group"
+                if remove_group(cmd_dict):
+                    print "Success to remove group"
+                else:
+                    print "Failed to remove group"
+                    sys.exit(2)
 
         sys.exit(0)
         
@@ -440,7 +496,7 @@ if __name__ == "__main__":
     else:
         server_port = profile_server.split(":")
         FILO_SERVER = server_port[0]
-        FILO_PORT = server_port[1]
+        FILO_PORT = int(server_port[1])
 
     if len(sys.argv)<2:
         usage();

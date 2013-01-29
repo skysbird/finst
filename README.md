@@ -32,7 +32,14 @@ INSTALL
 
          ./shutdown_profile_server.sh
 
-    
+###. Profile Server Setting
+
+         Finst will use the System Enviroment FINST_PROFILE_SERVER variable setting, or use the default setting on localhost:2222, if you want to change the default setting, please use the command below:
+        
+         export FINST_PROFILE_SERVER=10.0.0.10:2222
+
+         Notice that you should set this enviroment variable to all the nodes you want finst to communicate with the profile server.
+
 Feature:
 ====
 ###. distribute the ssh-key
@@ -85,12 +92,6 @@ Feature:
 
           finst modify -u skysbird -G admin 
 
-
-
-
-TODO
-=======
-
 ###. add,  remove a group.
 
    - add group with name=eng
@@ -104,6 +105,12 @@ TODO
          finst remove -g eng
 
          finst remove -g eng -h 'a[0-9].xinwaihui.com'
+
+
+
+TODO
+=======
+
 
 
 ###. sudo users
