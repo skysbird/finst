@@ -516,7 +516,7 @@ def main(argv):
                    else:
                         print "Failed to remove group to remote host %s"%remote_host
             
-            sys.exit(0)
+        sys.exit(0)
 
     else:
         print "local action"
