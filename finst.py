@@ -286,6 +286,70 @@ def center_modify_user(user):
    cmd_str = json.dumps(cmd_dict)
    r = send_cmd(cmd_str)
    return r=="ok"
+
+import os
+import os.path
+
+def check_sudo_conf(line,path):
+    #check whether already has sudo conf
+    cmd = "grep '%s' %s"%(line, path)
+    r = subprocess.Popen([cmd],shell=True,stdout=subprocess.PIPE)
+    rel = r.stdout.read()
+    return bool(rel)
+
+def check_group_exist(g):
+    group_path = "/etc/group"
+    cmd = "grep '%s:' %s"%(g, group_path)
+    r = subprocess.Popen([cmd],shell=True,stdout=subprocess.PIPE)
+    rel = r.stdout.read()
+    return bool(rel)
+     
+     
+def add_sudo_group(g):
+    finst_sudoer_path = "/etc/sudoers.d/finst_additional"
+    e = os.path.isfile(finst_sudoer_path)
+    if not e:
+        print "Finst additional sudoers file not exist will be created." 
+        f = open(finst_sudoer_path,'w')
+        f.close()
+    os.chmod(finst_sudoer_path,0440)
+    
+    to_add = "%%%s ALL=(ALL) ALL\n"%g
+
+    if not check_group_exist(g):
+        print "Group not exsist"
+        return 0
+
+    if check_sudo_conf(to_add[:-1],finst_sudoer_path):
+        print "Group %s already added to sudoers"%g
+        return 0
+
+    f = open(finst_sudoer_path,'a')
+    f.writelines(to_add)
+    f.close()
+ 
+
+    return 1
+
+def remove_sudo_group(g):
+    finst_sudoer_path = "/etc/sudoers.d/finst_additional"
+    e = os.path.isfile(finst_sudoer_path)
+    if not e:
+        print "Finst additional sudoers file not exist will be created." 
+        f = open(finst_sudoer_path,'w')
+        f.close()
+    os.chmod(finst_sudoer_path,0440)
+    
+    to_add = "%%%s ALL=(ALL) ALL\n"%g
+
+    if not check_sudo_conf(to_add[:-1],finst_sudoer_path):
+        print "Group %s not in sudoers"%g
+        return 0
+    else:
+        remove_cmd = ":a;N;$!ba;s/%s[\\n]*//g"%(to_add[:-1])
+        return not subprocess.Popen(["sed","-i",remove_cmd,finst_sudoer_path]).wait()
+
+    return 1
    
 def main(argv):
     try:           
@@ -330,7 +394,29 @@ def main(argv):
         else:
             usage()
         sys.exit(0)
-    
+   
+    if cmd_dict.has_key('sudo'):
+        print "sudo cmd"
+        if not cmd_dict.has_key('g'):
+            usage()
+            sys.exit(2)
+        else:
+            g = cmd_dict['g'] 
+            if cmd == "install":
+                if add_sudo_group(g):
+                    print "Sucess add Group %s to sudoers"%g
+                    sys.exit(0)
+                else:
+                    sys.exit(2)
+            else:
+                if remove_sudo_group(g):
+                    print "Sucess remove Group %s remove sudoers"%g
+                    sys.exit(0)
+                else:
+                    sys.exit(2)
+        
+
+ 
     if cmd_dict.has_key('c'):
         print "center action" 
         if cmd == "install":
