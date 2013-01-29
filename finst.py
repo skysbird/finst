@@ -468,9 +468,6 @@ def main(argv):
                     else:
                         if remote_add_sudo(cmd_dict,remote_host):
                             print "Success to add sudo to remote host %s"%remote_host
-                            sys.exit(0)
-                        else:
-                            sys.exit(2)
 
                 if cmd_dict.has_key('u'):
                    if remote_add_user(cmd_dict,remote_host):
@@ -493,9 +490,6 @@ def main(argv):
                     else:
                         if remote_remove_sudo(cmd_dict,remote_host):
                             print "Success to remove sudo from remote host %s"%remote_host
-                            sys.exit(0)
-                        else:
-                            sys.exit(2)
 
                 if cmd_dict.has_key('u'):
                    if remote_remove_user(cmd_dict,remote_host):
