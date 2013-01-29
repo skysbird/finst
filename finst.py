@@ -600,15 +600,23 @@ def merge(a,b):
             return [a]
     else:
         #parse [] in a
-        number_str = reobj.findall(a)[0][1:-1]
-        
+        pattern_str = reobj.findall(a)[0][1:-1]
+        pattern_list = pattern_str.split(",")
         ra = reobj.sub("[]",a)
-        number_list = number_str.split('-')
-        for n in range(int(number_list[0]),int(number_list[1])+1):
-            if b:
-                rel.append("%s.%s"%(reobj.sub(str(n),ra),b))
+        for pattern in pattern_list:
+            if '-' in pattern:
+                number_list = pattern.split('-')
+                for n in range(int(number_list[0]),int(number_list[1])+1):
+                    if b:
+                        rel.append("%s.%s"%(reobj.sub(str(n),ra),b))
+                    else:
+                        rel.append("%s"%(reobj.sub(str(n),ra)))
             else:
-                rel.append("%s"%(reobj.sub(str(n),ra)))
+                if b:
+                    rel.append("%s.%s"%(reobj.sub(pattern,ra),b))
+                else:
+                    rel.append("%s"%(reobj.sub(pattern,ra)))
+
         return rel
             
         
@@ -623,7 +631,8 @@ def parse(host):
             result1 = result1+ merge(part,r)
             
         result = result1
-    return result1
+
+    return result
 
     
 
