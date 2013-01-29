@@ -115,7 +115,7 @@ def add_user(user):
     username = user['u']
     user_str = center_get_user(username)
     if user_str=="no data":
-        print "user does not exsist in filo, please add user in filo first"
+        print "user does not exsist in profile server, please add user in profile server first"
         sys.exit(2)
     user_dict = json.loads(user_str)
     passwd = user_dict['passwd']
@@ -140,7 +140,7 @@ def modify_user(user):
     username = user['u']
     user_str = center_get_user(username)
     if user_str=="no data":
-        print "user does not exsist in filo, please mod user in filo first"
+        print "user does not exsist in profile server, please mod user in profile server first"
         sys.exit(2)
     user_dict = json.loads(user_str)
     G = None
@@ -163,7 +163,8 @@ def remove_user(user):
     return not subprocess.Popen(["userdel", username]).wait()
 
 def remote_add_user(cmd_dict,remote_host):
-    cmd = "finst.py install"
+    finst_profile_server = "%s:%s"%(FILO_SERVER,FILO_PORT)
+    cmd = "export FINST_PROFILE_SERVER=%s;finst.py install"%finst_profile_server
     params = ""
     for c,a in cmd_dict.iteritems():
         if c=='h':
@@ -174,7 +175,8 @@ def remote_add_user(cmd_dict,remote_host):
     return not rel
 
 def remote_modify_user(cmd_dict,remote_host):
-    cmd = "finst.py modify"
+    finst_profile_server = "%s:%s"%(FILO_SERVER,FILO_PORT)
+    cmd = "export FINST_PROFILE_SERVER=%s;finst.py modify"%finst_profile_server
     params = ""
     for c,a in cmd_dict.iteritems():
         if c=='h':
@@ -185,7 +187,8 @@ def remote_modify_user(cmd_dict,remote_host):
     return not rel
 
 def remote_remove_user(cmd_dict,remote_host):
-    cmd = "finst.py remove"
+    finst_profile_server = "%s:%s"%(FILO_SERVER,FILO_PORT)
+    cmd = "export FINST_PROFILE_SERVER=%s;finst.py remove"%finst_profile_server
     params = ""
     for c,a in cmd_dict.iteritems():
         if c=='h':
@@ -195,9 +198,41 @@ def remote_remove_user(cmd_dict,remote_host):
     rel = subprocess.Popen(["ssh", remote_host, cmd]).wait()
     return not rel
 
+def remote_add_sudo(cmd_dict,remote_host):
+    finst_profile_server = "%s:%s"%(FILO_SERVER,FILO_PORT)
+    cmd = "export FINST_PROFILE_SERVER=%s;finst.py install"%finst_profile_server
+    params = ""
+    for c,a in cmd_dict.iteritems():
+        if c=='h':
+            continue
+        if len(c)>1:
+            params = params + "--%s "%(c)
+        else: 
+            params = params + "-%s %s "%(c,a)
+    cmd = "%s %s"%(cmd,params)
+    print cmd
+    rel = subprocess.Popen(["ssh", remote_host, cmd]).wait()
+    return not rel
+
+
+def remote_remove_sudo(cmd_dict,remote_host):
+    finst_profile_server = "%s:%s"%(FILO_SERVER,FILO_PORT)
+    cmd = "export FINST_PROFILE_SERVER=%s;finst.py remove"%finst_profile_server
+    params = ""
+    for c,a in cmd_dict.iteritems():
+        if c=='h':
+            continue
+        if len(c)>1:
+            params = params + "--%s "%(c)
+        else: 
+            params = params + "-%s %s "%(c,a)
+    cmd = "%s %s"%(cmd,params)
+    rel = subprocess.Popen(["ssh", remote_host, cmd]).wait()
+    return not rel
 
 def remote_add_group(cmd_dict,remote_host):
-    cmd = "finst.py install"
+    finst_profile_server = "%s:%s"%(FILO_SERVER,FILO_PORT)
+    cmd = "export FINST_PROFILE_SERVER=%s;finst.py install"%finst_profile_server
     params = ""
     for c,a in cmd_dict.iteritems():
         if c=='h':
@@ -208,7 +243,8 @@ def remote_add_group(cmd_dict,remote_host):
     return not rel
 
 def remote_remove_group(cmd_dict,remote_host):
-    cmd = "finst.py remove"
+    finst_profile_server = "%s:%s"%(FILO_SERVER,FILO_PORT)
+    cmd = "export FINST_PROFILE_SERVER=%s;finst.py remove"%finst_profile_server
     params = ""
     for c,a in cmd_dict.iteritems():
         if c=='h':
@@ -252,7 +288,7 @@ def center_add_user(user):
 
    user_str = center_get_user(user['u'])
    if user_str!="no data":
-        print "user already exsist in filo center"
+        print "user already exsist in profile server center"
         sys.exit(2)
 
    passwd = makepassword()
@@ -268,7 +304,7 @@ def center_add_user(user):
 def center_remove_user(user):
    user_str = center_get_user(user['u'])
    if user_str=="no data":
-        print "user has not in filo yet"
+        print "user has not in profile server yet"
         sys.exit(2)
    cmd_dict = user
    cmd_dict['cmd'] = "remove_user"
@@ -279,7 +315,7 @@ def center_remove_user(user):
 def center_modify_user(user):
    user_str = center_get_user(user['u'])
    if user_str=="no data":
-        print "user has not in filo yet"
+        print "user has not in profile server yet"
         sys.exit(2)
    cmd_dict = user
    cmd_dict['cmd'] = "modify_user"
@@ -395,44 +431,28 @@ def main(argv):
             usage()
         sys.exit(0)
    
-    if cmd_dict.has_key('sudo'):
-        print "sudo cmd"
-        if not cmd_dict.has_key('g'):
-            usage()
-            sys.exit(2)
-        else:
-            g = cmd_dict['g'] 
-            if cmd == "install":
-                if add_sudo_group(g):
-                    print "Sucess add Group %s to sudoers"%g
-                    sys.exit(0)
-                else:
-                    sys.exit(2)
-            else:
-                if remove_sudo_group(g):
-                    print "Sucess remove Group %s remove sudoers"%g
-                    sys.exit(0)
-                else:
-                    sys.exit(2)
-        
-
- 
     if cmd_dict.has_key('c'):
         print "center action" 
-        if cmd == "install":
+
+        if cmd=="install":
             if cmd_dict.has_key('u'):
                 if center_add_user(cmd_dict):
-                    print "Success to add user to filo center"
+                    print "Success to add user to profile server center"
+            
         elif cmd == "modify":
             if cmd_dict.has_key('u'):
                 if center_modify_user(cmd_dict):
-                    print "Success to add user to filo center"
+                    print "Success to add user to profile server center"
         elif cmd == "remove":
             if cmd_dict.has_key('u'):
                 if center_remove_user(cmd_dict):
-                    print "Success to add user to filo center"
+                    print "Success to add user to profile server center"
 
         sys.exit(0)
+
+        
+
+ 
         
     if cmd_dict.has_key('h'):
         print "remote action"
@@ -440,6 +460,18 @@ def main(argv):
         remote_host_list = split_host(remote_host)
         for remote_host in remote_host_list:
             if cmd == "install":
+                if cmd_dict.has_key('sudo'):
+                    print "remote sudo cmd"
+                    if not cmd_dict.has_key('g'):
+                        usage()
+                        sys.exit(2)
+                    else:
+                        if remote_add_sudo(cmd_dict,remote_host):
+                            print "Success to add sudo to remote host %s"%remote_host
+                            sys.exit(0)
+                        else:
+                            sys.exit(2)
+
                 if cmd_dict.has_key('u'):
                    if remote_add_user(cmd_dict,remote_host):
                         print "Success to add user to remote host %s"%remote_host
@@ -453,6 +485,18 @@ def main(argv):
                    else:
                         print "Failed to modify user to remote host %s"%remote_host
             if cmd == "remove":
+                if cmd_dict.has_key('sudo'):
+                    print "remote sudo cmd"
+                    if not cmd_dict.has_key('g'):
+                        usage()
+                        sys.exit(2)
+                    else:
+                        if remote_remove_sudo(cmd_dict,remote_host):
+                            print "Success to remove sudo from remote host %s"%remote_host
+                            sys.exit(0)
+                        else:
+                            sys.exit(2)
+
                 if cmd_dict.has_key('u'):
                    if remote_remove_user(cmd_dict,remote_host):
                         print "Success to remove user to remote host %s"%remote_host
@@ -476,6 +520,27 @@ def main(argv):
 
     else:
         print "local action"
+
+        if cmd_dict.has_key('sudo'):
+            print "sudo cmd"
+            if not cmd_dict.has_key('g'):
+                usage()
+                sys.exit(2)
+            else:
+                g = cmd_dict['g'] 
+                if cmd == "install":
+                    if add_sudo_group(g):
+                        print "Sucess add Group %s to sudoers"%g
+                        sys.exit(0)
+                    else:
+                        sys.exit(2)
+                else:
+                    if remove_sudo_group(g):
+                        print "Sucess remove Group %s remove sudoers"%g
+                        sys.exit(0)
+                    else:
+                        sys.exit(2)
+
         if cmd == "install":
             if cmd_dict.has_key('u'):
                 if add_user(cmd_dict):
@@ -515,7 +580,7 @@ def main(argv):
                     print "Failed to remove group"
                     sys.exit(2)
 
-        sys.exit(0)
+            sys.exit(0)
         
              
     print opts
