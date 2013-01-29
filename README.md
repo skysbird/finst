@@ -43,6 +43,10 @@ INSTALL
 Feature:
 ====
 ###. distribute the ssh-key
+    
+    **Notice**
+
+    If you have not generated the key, please run ssh-keygen to generate a key for you first, then run the command below:
 	
     finst dist --ssh-key -h 'a[0-9].xinwaihui.com'
 
