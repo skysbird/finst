@@ -210,7 +210,7 @@ def remote_add_sudo(cmd_dict,remote_host):
         else: 
             params = params + "-%s %s "%(c,a)
     cmd = "%s %s"%(cmd,params)
-    print cmd
+    #print cmd
     rel = subprocess.Popen(["ssh", remote_host, cmd]).wait()
     return not rel
 
