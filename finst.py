@@ -210,7 +210,7 @@ def remote_add_sudo(cmd_dict,remote_host):
         else: 
             params = params + "-%s %s "%(c,a)
     cmd = "%s %s"%(cmd,params)
-    print cmd
+    #print cmd
     rel = subprocess.Popen(["ssh", remote_host, cmd]).wait()
     return not rel
 
@@ -328,7 +328,8 @@ import os.path
 
 def check_sudo_conf(line,path):
     #check whether already has sudo conf
-    cmd = "grep '%s' %s"%(line, path)
+    cmd = "egrep '.*%s' %s"%(line, path)
+    #print cmd
     r = subprocess.Popen([cmd],shell=True,stdout=subprocess.PIPE)
     rel = r.stdout.read()
     return bool(rel)
@@ -350,7 +351,7 @@ def add_sudo_group(g):
         f.close()
     os.chmod(finst_sudoer_path,0440)
     
-    to_add = "%%%s ALL=(ALL) ALL\n"%g
+    to_add = "%%%s ALL=(ALL) NOPASSWD:ALL\n"%g
 
     if not check_group_exist(g):
         print "Group not exsist"
@@ -376,7 +377,7 @@ def remove_sudo_group(g):
         f.close()
     os.chmod(finst_sudoer_path,0440)
     
-    to_add = "%%%s ALL=(ALL) ALL\n"%g
+    to_add = "%%%s ALL=(ALL) .*\n"%g
 
     if not check_sudo_conf(to_add[:-1],finst_sudoer_path):
         print "Group %s not in sudoers"%g
